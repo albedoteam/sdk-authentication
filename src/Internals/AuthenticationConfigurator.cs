@@ -22,8 +22,8 @@
             if (string.IsNullOrWhiteSpace(options.Audience))
                 throw new InvalidOperationException("Can not setup the authentication without a valid Audience");
             
-            if (options.AllowedOrigins is null || !options.AllowedOrigins.Any())
-                throw new InvalidOperationException("Can not setup the authentication without allowed origins");
+            // if (options.AllowedOrigins is null || !options.AllowedOrigins.Any())
+            //     throw new InvalidOperationException("Can not setup the authentication without allowed origins");
 
             Options = options;
             return this;
