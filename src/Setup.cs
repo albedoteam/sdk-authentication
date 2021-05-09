@@ -17,18 +17,30 @@
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
-            
+
             services.AddScoped<IAuthenticationConfigurator, AuthenticationConfigurator>();
             var provider = services.BuildServiceProvider();
             var authConfiguration = provider.GetService<IAuthenticationConfigurator>();
             configure.Invoke(authConfiguration);
-            
-            services
-                .AddCors(options => options
-                    .AddPolicy(AllowSpecificOrigins, builder => builder
-                        .WithOrigins(authConfiguration.Options.AllowedOrigins.ToArray())
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()));
+
+            if (authConfiguration.Options.AllowedOrigins is null || authConfiguration.Options.AllowedOrigins.Count <= 0)
+            {
+                services
+                    .AddCors(options => options
+                        .AddPolicy(AllowSpecificOrigins, builder => builder
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()));
+            }
+            else
+            {
+                services
+                    .AddCors(options => options
+                        .AddPolicy(AllowSpecificOrigins, builder => builder
+                            .WithOrigins(authConfiguration.Options.AllowedOrigins.ToArray())
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()));
+            }
 
             services
                 .AddAuthentication(options =>
@@ -52,6 +64,7 @@
         public static IApplicationBuilder UseAuth(this IApplicationBuilder app)
         {
             app.UseCors(AllowSpecificOrigins);
+            
             app.UseAuthentication();
             app.UseAuthorization();
 
